@@ -3,6 +3,7 @@ const crypto = require("crypto"); // return required number of characters
 const fs = require("fs");
 
 const jobController = {};
+
 jobController.getAllJobs = (req, res, next) => {
   const { page, companyName, title, city, singleSkill } = req.query;
   const requestPage = parseInt(page) || 1;
@@ -59,24 +60,6 @@ jobController.createJob = (req, res, next) => {
     skills,
   } = req.body;
 
-  // if (
-  //   typeof companyId !== "string" ||
-  //   typeof title !== "string" ||
-  //   typeof city !== "string" ||
-  //   typeof salaryLow !== "number" ||
-  //   salaryLow < 0 ||
-  //   typeof salaryHigh !== "number" ||
-  //   salaryHigh < 0 ||
-  //   typeof yrsXPExpected !== "number" ||
-  //   yrsXPExpected < 0 ||
-  //   typeof active !== "boolean" ||
-  //   typeof remote !== "boolean" ||
-  //   typeof description !== "string" ||
-  //   !Array.isArray(skills) ||
-  //   skills.length < 1
-  // ) {
-  //   throw new Error("MISSING INFOs");
-  // }
   const jobStructure = {
     companyId,
     title,
@@ -158,12 +141,3 @@ jobController.updateJobById = (req, res, next) => {
 };
 
 module.exports = jobController;
-
-//to check the last item from pagination
-// console.log(
-//   `${result[result.length - 1].id}, ${data.jobs[page * limit - 1].id}`,
-//   result[result.length - 1].id === data.jobs[page * limit - 1].id
-// );
-
-//check if we able to filter
-// console.log(result.filter((e) => e.title !== title));
