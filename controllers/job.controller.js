@@ -44,8 +44,6 @@ jobController.getAllJobs = (req, res, next) => {
   }
 };
 jobController.createJob = (req, res, next) => {
-  console.log("createJob");
-
   const {
     companyId,
     title,
@@ -92,8 +90,6 @@ jobController.createJob = (req, res, next) => {
   }
 };
 jobController.deleteJobById = (req, res, next) => {
-  console.log("deleteJob");
-
   try {
     const { id } = req.params;
     const rawData = fs.readFileSync("data.json", "utf8");
@@ -112,7 +108,6 @@ jobController.deleteJobById = (req, res, next) => {
   }
 };
 jobController.updateJobById = (req, res, next) => {
-  console.log("updateJob");
   const { id } = req.params;
 
   try {
