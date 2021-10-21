@@ -6,11 +6,11 @@ Exercise for CoderSchool 2021 - Panther - FullStack
 
 ## end point requirement
 
-- Get all jobs , pagination by `page=integer`, `limit=20`
+- Get all jobs , pagination by `page=integer`, `limit=20` [v]
 
   - search by `companyName=x`
-  - search by `title=x`
-  - search by `city=x`
+  - search by `title=x` [v]
+  - search by `city=x` [v]
   - search by `skills=x`
   - no case sensitive
 
