@@ -1,3 +1,9 @@
+# Intermediate Restful API
+
+## Description
+
+Exercise for CoderSchool 2021 - Panther - FullStack
+
 ## end point requirement
 
 - Get all jobs , pagination by `page=integer`, `limit=20`
