@@ -1,4 +1,5 @@
-const e = require("express");
+const crypto = require("crypto"); // return required number of characters
+
 const fs = require("fs");
 
 const jobController = {};
@@ -43,7 +44,69 @@ jobController.getAllJobs = (req, res, next) => {
 };
 jobController.createJob = (req, res, next) => {
   console.log("createJob");
-  return res.status(200).send("haha");
+
+  const {
+    companyId,
+    title,
+    city,
+    postedDate,
+    salaryLow,
+    salaryHigh,
+    yrsXPExpected,
+    active,
+    remote,
+    description,
+    skills,
+  } = req.body;
+
+  // if (
+  //   typeof companyId !== "string" ||
+  //   typeof title !== "string" ||
+  //   typeof city !== "string" ||
+  //   typeof salaryLow !== "number" ||
+  //   salaryLow < 0 ||
+  //   typeof salaryHigh !== "number" ||
+  //   salaryHigh < 0 ||
+  //   typeof yrsXPExpected !== "number" ||
+  //   yrsXPExpected < 0 ||
+  //   typeof active !== "boolean" ||
+  //   typeof remote !== "boolean" ||
+  //   typeof description !== "string" ||
+  //   !Array.isArray(skills) ||
+  //   skills.length < 1
+  // ) {
+  //   throw new Error("MISSING INFOs");
+  // }
+  const jobStructure = {
+    companyId,
+    title,
+    city,
+    postedDate: new Date(),
+    salaryLow,
+    salaryHigh,
+    yrsXPExpected,
+    active,
+    remote,
+    description,
+    skills,
+    id: crypto
+      .randomBytes(Math.ceil(10 / 2))
+      .toString("hex") // convert to hexadecimal format
+      .slice(0, 10)
+      .toUpperCase(),
+  };
+  try {
+    const rawData = fs.readFileSync("data.json", "utf8");
+    const data = JSON.parse(rawData);
+    let result = data.jobs;
+    result.push(jobStructure);
+    data.jobs = result;
+    const newData = JSON.stringify(data);
+    fs.writeFileSync("data.json", newData);
+    return res.status(200).send(jobStructure);
+  } catch (error) {
+    next(error);
+  }
 };
 jobController.deleteJobById = (req, res, next) => {
   console.log("deleteJob");
@@ -51,10 +114,35 @@ jobController.deleteJobById = (req, res, next) => {
 };
 jobController.updateJobById = (req, res, next) => {
   console.log("updateJob");
-  return res.status(200).send("haha");
+  const { id } = req.params;
+
+  try {
+    if (!id) throw new Error("No id receive");
+
+    const rawData = fs.readFileSync("data.json", "utf8");
+    const data = JSON.parse(rawData);
+    let result = data.jobs;
+
+    const update = result.map((e) => {
+      if (e.id === id) {
+        e.taken = true;
+      }
+      return e;
+    });
+
+    data.jobs = update;
+    const newData = JSON.stringify(data);
+
+    fs.writeFileSync("data.json", newData);
+
+    return res.status(200).send(data);
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = jobController;
+
 //to check the last item from pagination
 // console.log(
 //   `${result[result.length - 1].id}, ${data.jobs[page * limit - 1].id}`,
