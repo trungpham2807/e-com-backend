@@ -110,7 +110,23 @@ jobController.createJob = (req, res, next) => {
 };
 jobController.deleteJobById = (req, res, next) => {
   console.log("deleteJob");
-  return res.status(200).send("haha");
+
+  try {
+    const { id } = req.params;
+    const rawData = fs.readFileSync("data.json", "utf8");
+    const data = JSON.parse(rawData);
+
+    let result = data.jobs.filter((e, idx) => {
+      return e.id !== id;
+    });
+
+    data.jobs = result;
+    const newData = JSON.stringify(data);
+    fs.writeFileSync("data.json", newData);
+    return res.status(200).send("Successfully delete");
+  } catch (error) {
+    next(error);
+  }
 };
 jobController.updateJobById = (req, res, next) => {
   console.log("updateJob");
