@@ -3,28 +3,35 @@ const fs = require("fs");
 
 const jobController = {};
 jobController.getAllJobs = (req, res, next) => {
-  console.log("getAllJob");
-  console.log("getall query", req.query);
-  const { page, companyName, title, city, skills } = req.query;
+  const { page, companyName, title, city, singleSkill } = req.query;
   const requestPage = parseInt(page) || 1;
   const limit = 20;
-  console.log(title);
+
   try {
-    let rawData = fs.readFileSync("data.json", "utf8");
-    let data = JSON.parse(rawData);
-    let companyList = data.companies;
+    const rawData = fs.readFileSync("data.json", "utf8");
+    const data = JSON.parse(rawData);
+    const companyList = data.companies;
     let result = data.jobs;
 
     if (title) {
-      result = result.filter((e) => e.title === title);
+      result = result.filter(
+        (e) => e.title.toLowerCase() === title.toLowerCase()
+      );
     }
     if (city) {
-      result = result.filter((e) => e.city === city);
+      result = result.filter(
+        (e) => e.city.toLowerCase() === city.toLowerCase()
+      );
+    }
+    if (companyName) {
+      let queryCompany = companyList.find(
+        (e) => e.name.toLowerCase() === companyName.toLowerCase()
+      );
+      result = result.filter((e) => e.companyId === queryCompany.id);
     }
 
-    if (companyName) {
-      let queryCompany = companyList.find((e) => e.name === companyName);
-      result = result.filter((e) => e.companyId === queryCompany.id);
+    if (singleSkill) {
+      result = result.filter((e) => e.skills.includes(singleSkill));
     }
 
     result = result.slice((requestPage - 1) * limit, requestPage * limit);
