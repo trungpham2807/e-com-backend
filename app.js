@@ -27,7 +27,7 @@ app.use((req, res, next) => {
  * this function will send error message */
 app.use((err, req, res, next) => {
   if (err.statusCode) {
-    return res.status(err.status).send(err.message);
+    return res.status(err.statusCode).send(err.message);
   } else {
     return res.status(500).send(err.message);
   }
