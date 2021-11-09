@@ -14,6 +14,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 
+// Mongo connect
+require("./mongoConfig");
+
 app.use("/api", indexRouter);
 
 /** when request match no ruote, create error */
