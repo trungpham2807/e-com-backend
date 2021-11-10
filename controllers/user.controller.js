@@ -4,7 +4,8 @@ const bcrypt = require("bcrypt");
 const User = require("../models/User");
 
 const userController = {};
-const SALT_ROUND = 10;
+const SALT_ROUND = parseInt(process.env.SALT_ROUND);
+
 userController.getAll = async (req, res) => {
   const result = await User.find();
   return sendResponse(
@@ -17,6 +18,7 @@ userController.getAll = async (req, res) => {
   );
 };
 userController.createByEmailPassword = async (req, res, next) => {
+  console.log("Create account");
   const { name, email } = req.body;
   let { password } = req.body;
   let result;
@@ -40,7 +42,6 @@ userController.createByEmailPassword = async (req, res, next) => {
     "Successfully create user"
   );
 };
-
 userController.loginWithEmailPassword = async (req, res, next) => {
   const { email, password } = req.body;
   let result;
@@ -50,8 +51,9 @@ userController.loginWithEmailPassword = async (req, res, next) => {
     if (!user) throw new Error("User with the email is not found");
     let isMatch = await bcrypt.compare(password, user.password);
     console.log(isMatch);
+    const accessToken = await user.generateToken();
     if (isMatch) {
-      result = user;
+      result = accessToken;
     } else {
       throw new Error("Password not match");
     }
