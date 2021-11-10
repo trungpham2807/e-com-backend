@@ -7,12 +7,19 @@ const userController = {};
 const SALT_ROUND = parseInt(process.env.SALT_ROUND);
 
 userController.getAll = async (req, res) => {
-  const result = await User.find();
+  const limit = parseInt(req.query.limit) || 5;
+  const page = parseInt(req.query.page) || 1;
+  const result = await User.find({ isDeleted: false })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .skip(limit * (page - 1));
+
+  const count = result.length;
   return sendResponse(
     res,
     200,
     true,
-    result,
+    { result, count },
     false,
     "Successfully get all users"
   );
@@ -47,7 +54,7 @@ userController.loginWithEmailPassword = async (req, res, next) => {
   let result;
   try {
     if (!email || !password) throw new Error("Please input email and pass");
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, isDeleted: false });
     if (!user) throw new Error("User with the email is not found");
     let isMatch = await bcrypt.compare(password, user.password);
     console.log(isMatch);
@@ -61,28 +68,41 @@ userController.loginWithEmailPassword = async (req, res, next) => {
   }
   return sendResponse(res, 200, true, result, false, "Successfully login user");
 };
-
-userController.updateById = (req, res) => {
-  res.send("find by id and update");
-};
-userController.deleteById = (req, res) => {
-  res.send("delete by id and update");
-};
-userController.importantController = async (req, res, next) => {
-  //assume that this request already authenticated
+userController.updateById = async (req, res, next) => {
+  let result;
+  const allowOptions = ["name", "email"];
+  const updateObject = {};
 
   try {
+    allowOptions.forEach((option) => {
+      if (req.body[option] !== undefined) {
+        updateObject[option] = req.body[option];
+      }
+    });
+    result = await User.findByIdAndUpdate(req.currentUser._id, updateObject, {
+      new: true,
+    });
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully create user"
+  );
+};
+userController.deleteById = async (req, res, next) => {
+  //soft delete
+  try {
+    await User.findByIdAndUpdate(req.currentUser._id, {
+      isDeleted: true,
+    });
   } catch (error) {
     next(error);
   }
-  return res.send("DELETE everything");
+  return sendResponse(res, 200, true, null, false, "Successfully create user");
 };
-/** TODO:
- * delete user
- * update user
- * get single user
- * More Security for password !!!
- *
- */
-
 module.exports = userController;
