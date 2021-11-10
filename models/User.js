@@ -7,6 +7,7 @@ const userSchema = Schema(
     email: { type: String, required: true },
     password: { type: String, required: true },
     isDeleted: { type: Boolean, default: false },
+    role: { type: String, enum: ["admin", "guest"], default: "guest" },
   },
   {
     timestamps: true,

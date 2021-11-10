@@ -5,11 +5,13 @@ const {
   createByEmailPassword,
   updateById,
   deleteById,
+  loginWithEmailPassword,
 } = require("../controllers/user.controller");
 
 router.get("/", getAll);
 
 router.post("/", createByEmailPassword);
+router.post("/login", loginWithEmailPassword);
 
 router.put("/:id", updateById);
 
