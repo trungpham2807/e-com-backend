@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 
 // Mongo connect
-require("./mongoConfig");
+require("./mongo");
 
 app.use("/api", indexRouter);
 
