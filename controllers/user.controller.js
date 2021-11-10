@@ -51,9 +51,8 @@ userController.loginWithEmailPassword = async (req, res, next) => {
     if (!user) throw new Error("User with the email is not found");
     let isMatch = await bcrypt.compare(password, user.password);
     console.log(isMatch);
-    const accessToken = await user.generateToken();
     if (isMatch) {
-      result = accessToken;
+      result = await user.generateToken();
     } else {
       throw new Error("Password not match");
     }
@@ -68,6 +67,15 @@ userController.updateById = (req, res) => {
 };
 userController.deleteById = (req, res) => {
   res.send("delete by id and update");
+};
+userController.importantController = async (req, res, next) => {
+  //assume that this request already authenticated
+
+  try {
+  } catch (error) {
+    next(error);
+  }
+  return res.send("DELETE everything");
 };
 /** TODO:
  * delete user
