@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const authenticationMiddleware = require("../middlewares/auth.middleware");
 const isAdmin = require("../middlewares/isAdmin.middleware");
+
 const {
   getAll,
   createByEmailPassword,
