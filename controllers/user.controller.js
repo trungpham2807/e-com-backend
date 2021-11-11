@@ -103,6 +103,6 @@ userController.deleteById = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-  return sendResponse(res, 200, true, null, false, "Successfully create user");
+  return sendResponse(res, 200, true, null, false, "Successfully delete user");
 };
 module.exports = userController;
