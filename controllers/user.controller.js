@@ -9,12 +9,18 @@ const SALT_ROUND = parseInt(process.env.SALT_ROUND);
 userController.getAll = async (req, res) => {
   const limit = parseInt(req.query.limit) || 5;
   const page = parseInt(req.query.page) || 1;
-  const result = await User.find({ isDeleted: false })
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .skip(limit * (page - 1));
+  let result;
+  let count = 0;
+  try {
+    result = await User.find({ isDeleted: false })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip(limit * (page - 1));
 
-  const count = result.length;
+    count = result.length;
+  } catch (error) {
+    return next(error);
+  }
   return sendResponse(
     res,
     200,
@@ -25,7 +31,6 @@ userController.getAll = async (req, res) => {
   );
 };
 userController.createByEmailPassword = async (req, res, next) => {
-  console.log("Create account");
   const { name, email } = req.body;
   let { password } = req.body;
   let result;
@@ -38,7 +43,7 @@ userController.createByEmailPassword = async (req, res, next) => {
     password = await bcrypt.hash(password, salt);
     result = await User.create({ name, email, password });
   } catch (error) {
-    return sendResponse(res, 420, false, result, true, error.message);
+    return next(error);
   }
   return sendResponse(
     res,
@@ -57,14 +62,13 @@ userController.loginWithEmailPassword = async (req, res, next) => {
     const user = await User.findOne({ email, isDeleted: false });
     if (!user) throw new Error("User with the email is not found");
     let isMatch = await bcrypt.compare(password, user.password);
-    console.log(isMatch);
     if (isMatch) {
       result = await user.generateToken();
     } else {
       throw new Error("Password not match");
     }
   } catch (error) {
-    return sendResponse(res, 420, false, result, true, error.message);
+    return next(error);
   }
   return sendResponse(res, 200, true, result, false, "Successfully login user");
 };
@@ -91,7 +95,7 @@ userController.updateById = async (req, res, next) => {
     true,
     result,
     false,
-    "Successfully create user"
+    "Successfully update user"
   );
 };
 userController.deleteById = async (req, res, next) => {
@@ -101,7 +105,7 @@ userController.deleteById = async (req, res, next) => {
       isDeleted: true,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
   return sendResponse(res, 200, true, null, false, "Successfully delete user");
 };
