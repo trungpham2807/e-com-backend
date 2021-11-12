@@ -2,6 +2,7 @@ const Cart = require("../models/Cart");
 
 const Product = require("../models/Product");
 const sendResponse = require("../helpers/sendResponse");
+const User = require("../models/User");
 const cartController = {};
 
 cartController.createCart = async (req, res, next) => {
@@ -23,7 +24,7 @@ cartController.createCart = async (req, res, next) => {
       throw new Error("qty invalid");
     }
     //check if user already have a cart active
-    const activeCart = await Cart.findOne({ status: "active" });
+    const activeCart = await Cart.findOne({ owner, status: "active" });
     if (activeCart) throw new Error("already have active cart");
     //check if product id is true
     const found = await Product.findById(productId);
@@ -154,13 +155,105 @@ cartController.getSingleCart = async (req, res, next) => {
     "Successfully get single shopping cart"
   );
 };
-cartController.X = async (req, res, next) => {
+
+cartController.getAll = async (req, res, next) => {
+  let result = {};
+  //pagination
   try {
-  } catch (error) {}
+    result.carts = await Cart.find({}).populate([
+      "owner",
+      "products.productId",
+    ]);
+    result.count = result.carts.length;
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully get all cart"
+  );
 };
-cartController.X = async (req, res, next) => {
+
+cartController.getAllOwn = async (req, res, next) => {
+  let result = {};
+  //pagination
+  let owner = req.currentUser._id;
   try {
-  } catch (error) {}
+    result.carts = await Cart.find({ owner }).populate("products.productId");
+    result.count = result.carts.length;
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully get all cart"
+  );
+};
+cartController.payCart = async (req, res, next) => {
+  let result = {};
+  const { cartId } = req.params;
+
+  const { currentBalance, _id } = req.currentUser;
+  console.log(_id);
+  try {
+    const found = await Cart.findById(cartId).populate("products.productId");
+    const total = found.products.reduce(
+      (acc, cur) => acc + cur.qty * cur.productId.price,
+      0
+    );
+    if (found.status === "paid")
+      throw new Error("cart already pay, but i would appricate the charity");
+
+    if (total > currentBalance) throw new Error("404 - Money not found");
+    const newBalance = currentBalance - total;
+    result.cart = await Cart.findByIdAndUpdate(
+      cartId,
+      { status: "paid" },
+      { new: true }
+    );
+    const user = await User.findByIdAndUpdate(
+      _id,
+      { currentBalance: newBalance },
+      { new: true }
+    );
+    result.currentBalance = user.currentBalance;
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully  pay for cart shopping cart"
+  );
+};
+
+cartController.deleteCart = async (req, res, next) => {
+  let result;
+  const { cartId } = req.params;
+  const owner = req.currentUser._id;
+  try {
+    result = await Cart.findOneAndUpdate(
+      { _id: cartId, owner },
+      { isDeleted: true },
+      {
+        new: true,
+      }
+    );
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(res, 200, true, null, false, "Successfully delete cart");
 };
 
 module.exports = cartController;
