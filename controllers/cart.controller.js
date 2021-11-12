@@ -2,7 +2,6 @@ const Cart = require("../models/Cart");
 
 const Product = require("../models/Product");
 const sendResponse = require("../helpers/sendResponse");
-const User = require("../models/User");
 
 const cartController = {};
 
@@ -20,6 +19,13 @@ cartController.createCart = async (req, res, next) => {
     if (!productId || typeof qty !== "number") {
       throw new Error("Missing info");
     }
+    //check if qty is a positive number
+    if (qty < 0) {
+      throw new Error("qty invalid");
+    }
+    //check if user already have a cart active
+    const activeCart = await Cart.findOne({ status: "active" });
+    if (activeCart) throw new Error("already have active cart");
     //check if product id is true
     const found = await Product.findById(productId);
     if (!found) {
@@ -50,6 +56,32 @@ cartController.createCart = async (req, res, next) => {
     false,
     "Successfully create shopping cart"
   );
+};
+
+cartController.addProductToCart = async (req, res, next) => {
+  const owner = req.currentUser._id;
+
+  try {
+  } catch (error) {
+    return next(error);
+  }
+};
+
+cartController.X = async (req, res, next) => {
+  try {
+  } catch (error) {}
+};
+cartController.X = async (req, res, next) => {
+  try {
+  } catch (error) {}
+};
+cartController.X = async (req, res, next) => {
+  try {
+  } catch (error) {}
+};
+cartController.X = async (req, res, next) => {
+  try {
+  } catch (error) {}
 };
 
 module.exports = cartController;
