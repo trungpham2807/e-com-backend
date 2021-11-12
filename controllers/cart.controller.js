@@ -2,7 +2,6 @@ const Cart = require("../models/Cart");
 
 const Product = require("../models/Product");
 const sendResponse = require("../helpers/sendResponse");
-const mongoose = require("mongoose");
 const cartController = {};
 
 cartController.createCart = async (req, res, next) => {
@@ -132,9 +131,28 @@ cartController.removeProductFromCart = async (req, res, next) => {
     "Successfully create shopping cart"
   );
 };
-cartController.X = async (req, res, next) => {
+
+cartController.getSingleCart = async (req, res, next) => {
+  let result;
+  const { cartId } = req.query;
+  const owner = req.currentUser._id;
+
   try {
-  } catch (error) {}
+    console.log(owner, cartId);
+    result = await Cart.findOne({ owner, _id: cartId }).populate(
+      "products.productId"
+    );
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully get single shopping cart"
+  );
 };
 cartController.X = async (req, res, next) => {
   try {

@@ -3,6 +3,7 @@ const {
   createCart,
   addProductToCart,
   removeProductFromCart,
+  getSingleCart,
 } = require("../controllers/cart.controller");
 
 const authenticationMiddleware = require("../middlewares/auth.middleware");
@@ -30,4 +31,9 @@ router.delete(
   removeProductFromCart
 );
 
+/**
+ * Description: Update product
+ * Access : admin role required
+ */
+router.get("/single-cart", authenticationMiddleware, getSingleCart);
 module.exports = router;
