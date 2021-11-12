@@ -59,12 +59,36 @@ cartController.createCart = async (req, res, next) => {
 };
 
 cartController.addProductToCart = async (req, res, next) => {
-  const owner = req.currentUser._id;
-
+  //INPUT: owner, productId and qty
+  //Operation: find active cart => push new product to found
+  // => Find by id and update by found
+  const owner = req.currentUser._id; //safe
+  const { productId } = req.body; // have input?product availabe?if duplicated ++
+  let { qty } = req.body; //have input?qty Positive number?qty < stock?
+  let result; //safe
   try {
+    qty = parseInt(qty);
+    const product = {
+      productId,
+      qty,
+    };
+    const cartToUpdate = await Cart.findOne({ owner, status: "active" });
+    // if no cart should we create cart?
+    cartToUpdate.products.push(product);
+    result = await Cart.findByIdAndUpdate(cartToUpdate._id, cartToUpdate, {
+      new: true,
+    });
   } catch (error) {
     return next(error);
   }
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully create shopping cart"
+  );
 };
 
 cartController.X = async (req, res, next) => {
