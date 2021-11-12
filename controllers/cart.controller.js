@@ -2,7 +2,7 @@ const Cart = require("../models/Cart");
 
 const Product = require("../models/Product");
 const sendResponse = require("../helpers/sendResponse");
-
+const mongoose = require("mongoose");
 const cartController = {};
 
 cartController.createCart = async (req, res, next) => {
@@ -92,9 +92,45 @@ cartController.addProductToCart = async (req, res, next) => {
   );
 };
 
-cartController.X = async (req, res, next) => {
+cartController.removeProductFromCart = async (req, res, next) => {
+  let result;
+  const { cartId } = req.params;
+  let { productId, qty } = req.body;
+  // productId = new mongoose.Types.ObjectId(productId);
+
   try {
-  } catch (error) {}
+    const cartFound = await Cart.findById(cartId);
+    // const newProductsList = cartFound.products
+    //   .map((existed) => {
+    //     const newProduct = {
+    //       productId: existed.productId,
+    //       qty: existed.productId.equals(productId)
+    //         ? existed.qty - qty
+    //         : existed.qty,
+    //     };
+    //     return newProduct;
+    //   })
+    //   .filter((e) => e.qty > 0);
+
+    const newProductsList = cartFound.products.filter((existed) => {
+      if (existed.productId.equals(productId)) {
+        existed.qty -= qty;
+      }
+      return existed.qty > 0;
+    });
+    cartFound.products = newProductsList;
+    result = await Cart.findByIdAndUpdate(cartId, cartFound, { new: true });
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully create shopping cart"
+  );
 };
 cartController.X = async (req, res, next) => {
   try {
