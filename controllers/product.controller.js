@@ -29,7 +29,7 @@ productController.createProduct = async (req, res, next) => {
       price,
       stock,
     };
-    console.log("hahha", newProduct);
+    console.log("new product", newProduct);
 
     const found = await Product.findOne({ name });
     if (found) {
